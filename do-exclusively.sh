@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # Script for ensuring that CircleCI builds/deploys a single instance of a given branch or tag at a time
+# This is a modified version of a CircleCI script (https://github.com/bellkev/circle-lock-test)
 
 # sets $branch, $tag, $rest
 parse_args() {
