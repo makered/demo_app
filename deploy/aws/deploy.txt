@@ -1,0 +1,57 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "Stmt1439755095000",
+            "Effect": "Allow",
+            "Action": [
+                "elasticloadbalancing:DescribeInstanceHealth",
+                "elasticloadbalancing:DescribeLoadBalancers"
+            ],
+            "Resource": [
+                "*"
+            ]
+        },
+        {
+            "Sid": "Stmt1439755212000",
+            "Effect": "Allow",
+            "Action": [
+                "iam:ListInstanceProfilesForRole"
+            ],
+            "Resource": [
+                "*"
+            ]
+        },
+        {
+            "Sid": "Stmt1439755292000",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DeleteSnapshot",
+                "ec2:DeregisterImage",
+                "ec2:DescribeImages",
+                "ec2:DescribeKeyPairs",
+                "ec2:DescribeSecurityGroups"
+            ],
+            "Resource": [
+                "*"
+            ]
+        },
+        {
+            "Sid": "Stmt1439755408000",
+            "Effect": "Allow",
+            "Action": [
+                "autoscaling:CreateLaunchConfiguration",
+                "autoscaling:DeleteLaunchConfiguration",
+                "autoscaling:DescribeAutoScalingGroups",
+                "autoscaling:DescribeLaunchConfigurations",
+                "autoscaling:ResumeProcesses",
+                "autoscaling:SuspendProcesses",
+                "autoscaling:TerminateInstanceInAutoScalingGroup",
+                "autoscaling:UpdateAutoScalingGroup"
+            ],
+            "Resource": [
+                "*"
+            ]
+        }
+    ]
+}

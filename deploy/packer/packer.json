@@ -1,0 +1,56 @@
+{
+  "variables": {
+    "aws_access_key": "",
+    "aws_secret_key": "",
+    "source_ami": null,
+    "ssh_user": null,
+    "vpc_subnet_id": null,
+    "vpc_id": null,
+    "region": null,
+    "availability_zone": null,
+    "instance_type": null,
+    "iam_instance_profile": null,
+    "localhost": "127.0.0.1",
+    "application": null,
+    "ami_name": null,
+    "branch": null
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "ami_name": "{{user `ami_name`}}",
+      "ami_description": "Built on {{isotime}}",
+      "source_ami": "{{user `source_ami`}}",
+      "instance_type": "{{user `instance_type`}}",
+      "region": "{{user `region`}}",
+      "vpc_id": "{{user `vpc_id`}}",
+      "availability_zone": "{{user `availability_zone`}}",
+      "subnet_id": "{{user `vpc_subnet_id`}}",
+      "associate_public_ip_address": true,
+      "iam_instance_profile": "{{user `iam_instance_profile`}}",
+      "ssh_username": "{{user `ssh_user`}}",
+      "run_tags": {
+        "env": "build"
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "sudo apt-get -y install software-properties-common",
+        "sudo apt-add-repository ppa:ansible/ansible",
+        "sudo apt-get update",
+        "sudo apt-get -y install ansible"
+      ]
+    },
+    {
+      "type": "ansible-local",
+      "extra_arguments": [ "-e '{\"branch\": \"{{user `branch`}}\", \"app_name\": \"{{user `application`}}\", \"deploy_user\": \"{{user `ssh_user`}}\", \"host\": \"{{user `localhost`}}\"}'" ],
+      "playbook_file": "deploy/ansible/playbooks/demo_app/site.yml",
+      "group_vars": "deploy/ansible/playbooks/demo_app/group_vars"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+/var/log/{{ app_name }}/develop.log
+{
+  daily
+  missingok
+  notifempty
+  sharedscripts
+  copytruncate
+  rotate 7
+  compress
+  delaycompress
+  create 0640 {{ app_name }} {{ app_name }}
+}
+
+/var/log/{{ app_name }}/staging.log
+{
+  daily
+  missingok
+  notifempty
+  sharedscripts
+  copytruncate
+  rotate 7
+  compress
+  delaycompress
+  create 0640 {{ app_name }} {{ app_name }}
+}
+
+/var/log/{{ app_name }}/production.log
+{
+  daily
+  missingok
+  notifempty
+  sharedscripts
+  copytruncate
+  rotate 7
+  compress
+  delaycompress
+  create 0640 {{ app_name }} {{ app_name }}
+}

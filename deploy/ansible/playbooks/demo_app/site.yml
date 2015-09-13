@@ -1,0 +1,63 @@
+---
+# Build application
+
+- name: Build application
+  hosts: "{{ host }}"
+  remote_user: "{{ deploy_user }}"
+  become: yes
+
+  vars:
+    template_path: "{{ app_name }}/deploy/ansible/playbooks/{{ app_name }}/templates"
+
+  tasks:
+    - name: Upgrade APT packages
+      apt:
+        upgrade=safe
+        update_cache=yes
+
+    - name: Add application group
+      group: name={{ app_name }} state=present
+
+    - name: Add application user
+      user: name={{ app_name }} system=yes group={{ app_name }} createhome=no
+
+    - name: Set Node version
+      command: n {{ node_version }}
+
+    - name: Checkout application from repository
+      become: no
+      git: repo=ssh://git@github.com/{{ github_org }}/{{ app_name }}.git
+           accept_hostkey=yes
+           dest=~/{{ app_name }}
+           version={{ branch }}
+
+    - name: Write .npmrc (use npm_lazy proxy)
+      become: no
+      template: src="~/{{ template_path }}/npmrc.j2" dest="~/.npmrc"
+
+    - name: Install npm modules
+      become: no
+      npm: path=~/{{ app_name }} production=yes
+
+    - name: Copy application
+      command: cp -r /home/{{ deploy_user }}/{{ app_name }} /opt
+
+    - name: Deploy logrotate config
+      template: src=/opt/{{ template_path }}/logrotate.j2 dest="/etc/logrotate.d/{{ app_name }}"
+
+    - name: Deploy Cloudwatch log config
+      template: src=/opt/{{ template_path }}/cloudwatch.conf.j2 dest="/var/awslogs/etc/awslogs.conf"
+      notify:
+      - restart awslogs
+
+    - name: Deploy init script
+      template: src=/opt/{{ template_path }}/init.conf.j2 dest="/etc/init/{{ app_name }}.conf"
+
+    - name: Remove temp files/dirs
+      file: path={{ item }} state=absent
+      with_items:
+        - "/home/{{ deploy_user }}/{{ app_name }}"
+  handlers:
+      - name: restart awslogs
+        service: name=awslogs state=restarted
+

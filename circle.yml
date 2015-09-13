@@ -1,0 +1,49 @@
+machine:
+  timezone:
+    UTC
+  node:
+    version:
+      0.12.7
+  environment:
+    NODE_ENV: test
+    PATH: ${PATH}:${HOME}/packer
+  pre:
+    # install packer
+    - ./${CIRCLE_PROJECT_REPONAME}/deploy/packer.sh
+  post:
+    - npm install --global gulp
+
+dependencies:
+  override:
+    # jq is needed for the do-exclusively.sh
+    - curl -L -o ~/bin/jq https://s3.amazonaws.com/public_packages/jq-linux64 && chmod +x ~/bin/jq
+
+test:
+  pre:
+    - nohup bash -c "NODE_ENV='test' npm start &":
+        parallel: true
+  override:
+    - npm test
+
+# branch names adhire to git-flow (https://github.com/nvie/gitflow) scheme
+deployment:
+  develop:
+    branch: [develop]
+    commands:
+      - ./do-exclusively.sh --branch develop gulp deploy --branch=${CIRCLE_BRANCH} --source_ami=${SOURCE_AMI} --region=${AWS_REGION} --instance_type=${INSTANCE_TYPE_DEV} --environment=develop:
+          timeout: 1800
+  release:
+    branch: /release\/.+/
+    commands:
+      - ./do-exclusively.sh --branch release gulp deploy --branch=${CIRCLE_BRANCH} --source_ami=${SOURCE_AMI} --region=${AWS_REGION} --instance_type=${INSTANCE_TYPE_STAGE} --environment=staging:
+          timeout: 1800
+  hotfix:
+    branch: /hotfix\/.+/
+    commands:
+      - ./do-exclusively.sh --branch hotfix gulp deploy --branch=${CIRCLE_BRANCH} --source_ami=${SOURCE_AMI} --region=${AWS_REGION} --instance_type=${INSTANCE_TYPE_STAGE} --environment=staging:
+          timeout: 1800
+  prod:
+    branch: [master]
+    commands:
+      - ./do-exclusively.sh --branch master gulp deploy --branch=${CIRCLE_BRANCH} --source_ami=${SOURCE_AMI} --region=${AWS_REGION} --instance_type=${INSTANCE_TYPE_PROD} --environment=production:
+          timeout: 1800
